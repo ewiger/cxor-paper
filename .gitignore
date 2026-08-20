@@ -10,8 +10,11 @@
 *.run.xml
 *.toc
 *-blx.bib
-cxor-paper.pdf
 
 # Python
 __pycache__/
 *.pyc
+
+# PDF
+*.pdf
+!cxor-paper.pdf
