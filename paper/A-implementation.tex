@@ -1,0 +1,45 @@
+\section{Reference implementation}\label{sec:implementation-new}
+
+The following dependency-free code implements the sixteen-rule transform and its causal decoder.
+The wiring index uses the truth-table convention of Section~\ref{sec:wirings}; selecting
+\code{k=5} gives the historical $\cxor$ instance.
+
+\begin{lstlisting}
+def wiring(k, s, x):
+    """W_k(s,x), where k's bits are w(0,0),w(0,1),w(1,0),w(1,1)."""
+    row = 2 * s + x
+    return (k >> (3 - row)) & 1
+
+def encode(bits, m=4, k=5, table=None, prefix=None):
+    table = list(table) if table is not None else [0] * (1 << m)
+    context = list(prefix) if prefix is not None else [0] * m
+    residual = []
+    for x in bits:
+        a = int("".join(map(str, context)), 2) if m else 0
+        s = table[a]
+        residual.append(x ^ s)
+        table[a] = wiring(k, s, x)
+        if m:
+            context = context[1:] + [x]
+    return residual
+
+def decode(residual, m=4, k=5, table=None, prefix=None):
+    table = list(table) if table is not None else [0] * (1 << m)
+    context = list(prefix) if prefix is not None else [0] * m
+    bits = []
+    for r in residual:
+        a = int("".join(map(str, context)), 2) if m else 0
+        s = table[a]
+        x = r ^ s
+        bits.append(x)
+        table[a] = wiring(k, s, x)
+        if m:
+            context = context[1:] + [x]
+    return bits
+\end{lstlisting}
+
+The historical \code{cta.py} uses a \code{bitarray} table and performs the $\W5$ assignment only
+when the residual is one.  As shown in Section~\ref{sec:cta}, omitting the assignment when the
+residual is zero leaves exactly the same state.  Its inverse reconstructs $x=r\oplus s[a]$, writes
+$x$ to the cell, and shifts the recovered bit into the context, matching \code{decode(..., k=5)}
+above.

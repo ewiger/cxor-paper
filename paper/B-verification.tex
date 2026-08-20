@@ -1,0 +1,26 @@
+\section{Computational checks}\label{sec:verification-new}
+
+The proofs in the body do not depend on experiments.  A deterministic, dependency-free harness
+in \code{cta\_spec.py} nevertheless checks the implementation against the main claims.  Running
+\code{make check} performs, among other tests:
+\begin{itemize}
+  \item exhaustive truth-table indexing and ANF classification for all sixteen wirings;
+  \item causal-prefix checks for all rules, exhaustive bijectivity on short tapes, and round trips
+        through the sequential decoder for all rules and all tables and prefixes in the tested
+        ranges;
+  \item the transfer formula for all eight affine rules and both initial cell values, together
+        with direct nonlinearity tests for the eight $d_3=1$ rules;
+  \item the four state-retention regimes of Equation~\eqref{eq:delta-horizon}, checked
+        position-by-position for all sixteen rules; and
+  \item exhaustive order-zero Gray conversion over all $2^{12}$ twelve-bit words, plus the
+        stride-two identity at order one through length $13$.
+\end{itemize}
+
+The separate \code{cta\_w5\_w6.py} harness reproduces the reference 33-bit example, compares the
+$\W5$ and $\W6$ interpretations, exercises the causal inverse, and verifies their mutual inverse
+relationship when the address sequence is frozen.  The earlier implementation's output agrees with $\W5$:
+\[
+\bstr{101001110111000011100001000000001}.
+\]
+The generated checks are corroboration and regression tests; causality, the per-context operator
+classification, and the adaptation horizons are established algebraically in the paper.

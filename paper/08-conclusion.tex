@@ -1,0 +1,22 @@
+\section{Conclusion}\label{sec:conclusion-new}
+
+$\cxor$ is a particularly small member of the broader CTA family: each binary $m$-bit context
+addresses one bit of state, and an XOR emitter combines that state with the source.  Under the
+historically implemented $\W5$ update, the state is a hard prediction equal to the successor most
+recently observed for that context.  The transform can therefore suppress stable
+context-to-successor associations, producing a zero-rich residual on favourable inputs.  It
+remains a length-preserving bijection, not a compressor; any coding benefit must come from a
+downstream model and coder.
+
+Varying the one-bit update exposes a complete sixteen-rule space within this architecture.
+Causal sequential decoding works for every rule.  Within each interleaved context class, the
+eight affine rules collapse to the operators $1$, $1+T$, and $(1+T)^{-1}$, while the eight
+nonlinear rules use an observation-dependent retention factor.  The same factor gives four
+adaptation horizons.  $\W5$ is the immediately adapting last-observation predictor; $\W6$ is its
+running-parity operator counterpart and never forgets its initial state.  Gray coding appears
+cleanly at $m=0$, but context-addressed prediction is the general $\cxor$ construction.
+
+Moving upward from one bit to counts, probabilities, PPM, and context mixing sacrifices this tiny
+classification but preserves the central principle: a causal predictor can be paired with a
+reversible residual.  In this sense, $\cxor$ provides an analytically complete base case for
+richer predictive models.

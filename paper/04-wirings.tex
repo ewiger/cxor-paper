@@ -1,0 +1,73 @@
+\section{The sixteen one-bit update rules}\label{sec:wirings}
+
+The one-bit $\cxor$ model fixes the address calculation and residual emitter, leaving only the
+cell update to vary.  If the update can inspect only the old state $s$ and current source bit
+$x$, it is a function $w:\F^2\to\F$.  Four input pairs must each be assigned one output bit, so
+there are
+\[
+  2^{|\F^2|}=2^4=16
+\]
+rules.  This is the complete update space under the one-cell, one-bit $\cxor$ restriction.
+
+We name a rule by reading
+\[
+  w(0,0)\,w(0,1)\,w(1,0)\,w(1,1)
+\]
+as a four-bit binary integer, most significant bit first.  Thus the projection $w(s,x)=x$ has
+truth table $0101$ and is $\W5$, while exclusive-or $w(s,x)=s+x$ has table $0110$ and is
+$\W6$.
+
+Every two-variable Boolean function has a unique algebraic normal form (ANF)
+\begin{equation}\label{eq:anf-new}
+  w(s,x)=d_0+d_1s+d_2x+d_3sx,
+  \qquad d_i\in\F .
+\end{equation}
+Indeed, evaluating at $(0,0),(1,0),(0,1),(1,1)$ successively determines
+\begin{equation}\label{eq:anf-coeff}
+  d_0=w(0,0),\quad d_1=w(1,0)+d_0,\quad d_2=w(0,1)+d_0,
+  \quad d_3=w(1,1)+d_0+d_1+d_2.
+\end{equation}
+This standard representation \cite{carlet2010boolean} exposes the classification needed below:
+$d_3=0$ gives an \emph{affine} update, while $d_3=1$ couples the retained state to the observed
+data.  In the language of Post's classification, the eight rules with $d_3=0$ constitute the
+affine class \cite{post1941}; no further lattice machinery is needed here.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}clll@{\qquad}clll@{}}
+\toprule
+rule & truth & ANF & kind & rule & truth & ANF & kind\\
+\midrule
+$\W0$  & \bstr{0000} & $0$                 & affine & $\W8$  & \bstr{1000} & $1+s+x+sx$ & nonlinear\\
+$\W1$  & \bstr{0001} & $sx$                & nonlinear & $\W9$  & \bstr{1001} & $1+s+x$ & affine\\
+$\W2$  & \bstr{0010} & $s+sx$              & nonlinear & $\W{10}$ & \bstr{1010} & $1+x$ & affine\\
+$\W3$  & \bstr{0011} & $s$                 & affine & $\W{11}$ & \bstr{1011} & $1+x+sx$ & nonlinear\\
+$\W4$  & \bstr{0100} & $x+sx$              & nonlinear & $\W{12}$ & \bstr{1100} & $1+s$ & affine\\
+$\W5$  & \bstr{0101} & $x$                 & affine & $\W{13}$ & \bstr{1101} & $1+s+sx$ & nonlinear\\
+$\W6$  & \bstr{0110} & $s+x$               & affine & $\W{14}$ & \bstr{1110} & $1+sx$ & nonlinear\\
+$\W7$  & \bstr{0111} & $s+x+sx$            & nonlinear & $\W{15}$ & \bstr{1111} & $1$ & affine\\
+\bottomrule
+\end{tabular}
+\caption{The complete update-rule space.  Addition and multiplication are in $\F$.  ``Nonlinear''
+means $d_3=1$ in ANF; the resulting recurrence has data-dependent state retention.}
+\label{tab:new-wirings}
+\end{table}
+
+Two rules deserve names beyond their indices:
+\begin{align}
+  \W5(s,x)&=x,
+  &\text{last-observation update,}\label{eq:w5-rule}\\
+  \W6(s,x)&=s+x,
+  &\text{running-parity update.}\label{eq:w6-rule}
+\end{align}
+$\W5$ is the rule used by the earlier $\cxor$ implementation.  It discards the old cell after
+every observation and stores the successor just seen.  $\W6$ instead writes $s+x$, which is also the emitted residual
+$r$ at that step.  Along repeated visits to one context it accumulates the parity of all observed
+successors.  Although the same emitter permits reading its state as a hard prediction, its update
+does not learn ``what followed this context last'' and is not naturally a next-symbol predictor.
+It enters because it is the algebraic counterpart of $\W5$, not because it shares $\W5$'s modelling
+interpretation.
+
+All sixteen rules use the same causal emitter and are therefore invertible by
+Theorem~\ref{thm:causal-inverse}.  The classification below asks what the update changes, rather
+than using invertibility to choose an update.

@@ -1,0 +1,48 @@
+\section{From \texorpdfstring{$\cxor$}{cxor} back to statistical compression}\label{sec:ladder}
+
+$\cxor_{\W5}$ can be read as a context model reduced to one bit, and its limitations are exactly
+what that reduction removes.  A cell can say ``zero'' or ``one,'' but not ``one with probability
+$0.9$.''  It cannot distinguish a prediction supported by one observation from one supported by
+a thousand.  $\W5$ changes its mind after every error, has no escape when a context is new, and
+cannot share evidence between related contexts.
+
+Putting capacity back gives a useful conceptual ladder:
+\[
+\begin{gathered}
+\boxed{\text{one-bit $\cxor$ predictor}}\\[-1pt]
+\big\downarrow\\[-1pt]
+\boxed{\text{successor counts and probabilities}}\\[-1pt]
+\big\downarrow\\[-1pt]
+\boxed{\text{PPM with escape/backoff}}\\[-1pt]
+\big\downarrow\\[-1pt]
+\boxed{\text{context mixing or learned prediction}}
+\end{gathered}
+\]
+The first step replaces a hard remembered successor by evidence about both possible successors.
+PPM combines context orders through an explicit escape mechanism \cite{bell1990text}.  Context
+mixing combines predictions from many models, often with adaptive weights
+\cite{Mahoney2005AdaptiveWO}.  These are not variants among the sixteen wirings: widening the
+state leaves the finite one-bit design space.
+
+What survives is the causal architecture.  At position $k$, a deterministic predictor whose
+state is reproducible from $x_0,\dots,x_{k-1}$ may produce a hard decision $\hat x_k$, and
+\[
+  r_k=x_k+\hat x_k
+\]
+remains an invertible residual for exactly the reason used in
+Theorem~\ref{thm:causal-inverse}.  The predictor may contain counts, mixtures, or learned state;
+the decoder recovers $x_k=r_k+\hat x_k$ and then performs the same state update.  Exact
+reproducibility, including numerical arithmetic, is essential.
+
+Probabilistic compressors normally do something more informative.  They pass the probability
+$P(x_k=1\mid x_{<k})$ to an arithmetic or range coder rather than threshold it to one bit and
+discard confidence.  $\cxor_{\W5}$ isolates the degenerate hard-prediction case, in which correctness alone
+is represented.  It is useful analytically because its state and complete update space are small,
+not because one bit is expected to compete with a statistical model.
+
+The practical question left by the example in Section~\ref{sec:intro} is correspondingly narrow:
+for which sources, context orders, and downstream coders does contextual differencing expose
+structure that the back end models more cheaply than the original sequence?  Answering it needs
+comparative experiments that include the model description, initialisation, coder, and any side
+information.  Zero enrichment alone is a diagnostic of prediction success, not a compression
+result.

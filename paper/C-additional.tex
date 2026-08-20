@@ -1,0 +1,72 @@
+\section{Further structure of the one-bit model}\label{sec:further-structure}
+
+The one-bit model has two further structural properties: affine dependence on the initial table,
+and a delay before an update rule becomes observable in the output.
+
+\subsection{Affine dependence on the initial table}
+
+The split in Section~\ref{sec:structure} concerns linearity in the \emph{successor sequence}.
+With the source held fixed, a different fact holds: the transform is affine in its initial table
+for all sixteen wirings, including those with $d_3=1$.
+
+To see this, factor the ANF as
+\begin{equation}\label{eq:factored-appendix}
+  w(s,x)=\underbrace{(d_0+d_2x)}_{\alpha(x)}
+        +\underbrace{(d_1+d_3x)}_{\beta(x)}s .
+\end{equation}
+Fix one context with successor sequence $y_0,y_1,\dots$ and initial cell $q$.  Its recurrence has
+the form
+\[
+  u_{j+1}=\alpha(y_j)+\beta(y_j)u_j.
+\]
+Induction gives
+\begin{equation}\label{eq:affine-in-q}
+  u_j=\mu_j+\lambda_jq,
+  \qquad
+  \lambda_j=\prod_{i<j}\beta(y_i),
+\end{equation}
+where $\mu_j$ and $\lambda_j$ depend on the fixed source but not on $q$.  Since
+$r_{k_j}=y_j+u_j$, every residual in that context is affine in its own initial cell.
+
+Cells never interact, and the address sequence depends on the source and prefix rather than the
+initial table.  Consequently, for fixed $(\pi,x)$ there is a linear map
+$P_{\pi,x}:\F^{2^m}\to\F^n$ such that
+\begin{equation}\label{eq:table-affine-appendix}
+  \cxor_w(q,\pi,x)
+  =\cxor_w(0,\pi,x)+P_{\pi,x}q
+\end{equation}
+for every wiring $w$.  This does not contradict the nonlinear classification: when $d_3=1$,
+$\beta(x)$ is a source-dependent coefficient, which is constant only because $x$ is held fixed
+in Equation~\eqref{eq:table-affine-appendix}.
+
+The columns of $P_{\pi,x}$ have disjoint supports: changing cell $a$ can affect only visits to
+context $a$.  Moreover, a visited cell always affects its first visit, because the empty product
+in Equation~\eqref{eq:affine-in-q} is $\lambda_0=1$.  It follows immediately that
+\begin{equation}\label{eq:rank-appendix}
+  \operatorname{rank}P_{\pi,x}
+  =\bigl|\{a:\text{$a$ is visited by $(\pi,x)$}\}\bigr|
+  \le 2^m .
+\end{equation}
+Thus a known source/residual pair determines the initial bits of all visited cells, while
+unvisited cells are necessarily unobservable.  Equation~\eqref{eq:delta-horizon} refines the same
+calculation by describing the full support of each nonzero column.
+
+\subsection{When does the wiring become visible?}
+
+At a context's first visit, the emitted residual is $y_0+q$ and is independent of the update rule;
+the rule acts only after that bit has been emitted.  Differences between two wirings can therefore
+be observed only on a later visit to a cell on which their earlier updates disagreed.
+
+$\W5$ and $\W6$ have an additional one-visit agreement when the table starts at zero.  On the
+first visit both store $y_0$.  They consequently emit the same residual on the second visit, but
+then store respectively
+\[
+  \W5(y_0,y_1)=y_1,
+  \qquad
+  \W6(y_0,y_1)=y_0+y_1.
+\]
+If $y_0=1$, that difference becomes observable on the third visit to the context.  For a zero
+prefix, the tape $1\,0^{m+2}$ supplies such a trace in the all-zero context and separates the two
+rules at its last symbol; its length is $m+3$.  The verification harness confirms that no shorter
+tape separates them for $m\le6$.  Thus the $\W5$/$\W6$ distinction is invisible until some
+context has accumulated enough visit history.

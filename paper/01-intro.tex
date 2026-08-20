@@ -1,0 +1,89 @@
+\section{From context modelling to \texorpdfstring{$\cxor$}{cxor}}\label{sec:intro}
+
+Statistical compression begins by assigning probabilities to the next symbol.  In a binary
+order-$m$ context model, the $m$ most recent source bits select one of $2^m$ contexts, and the
+model records what has followed that context in the past.  Prediction by partial matching (PPM),
+for example, keeps symbol counts at several context orders and uses an escape mechanism when a
+long context is uninformative \cite{bell1990text}.  A probability model and an entropy coder then
+turn accurate probability estimates into a short representation.
+
+Context Transformation Algorithms (CTA) denotes the broader idea of associating state with
+contexts and using it to transform a source.  This paper studies one deliberately restricted
+binary member, which we call $\cxor$ (CTA-XOR):
+\[
+  {\small
+    \text{Context Transformation Algorithms (CTA)}
+    \supset
+    \text{$\cxor$ over $\F$}
+    \supset
+    \text{the historical $\W5$ instance}.}
+\]
+
+$\cxor$ can be reached from context modelling by asking how little of the architecture can
+remain.  Give each context exactly one bit of state and interpret that bit as a hard prediction
+$\hat x$ of the next source bit.  When the actual bit $x$ arrives, emit
+\begin{equation}\label{eq:residual-intro}
+  r=x\mathbin{\oplus}\hat x .
+\end{equation}
+Then $r=0$ means that the context predicted correctly, while $r=1$ means a prediction error.  The
+result is simultaneously a context-indexed predictor and a residual transform.
+
+The historically implemented update is as small as the state.  After observing $x$, store $x$ in
+the cell for the current context:
+\begin{equation}\label{eq:w5-intro}
+  \W5(s,x)=x .
+\end{equation}
+Thus the next time the same context occurs, $\W5$ predicts that it will have the same successor as
+last time.  It has one bit per context, immediate adaptation, and no counts, probabilities,
+confidence, escape, or backoff.  This predictor interpretation is not an analogy added after the
+fact: it is exactly the read--compare--update sequence in the earlier $\cxor$ implementation.
+
+The residual can be more skewed than the source.  With context order $m=4$, the example shipped
+with the reference $\W5$ program is
+\begin{center}
+\begin{tabular}{@{}r@{\ }l@{}}
+input:       & \bstr{101001110111011111011111111111110}\\
+$\cxor_{\W5}$: & \bstr{101001110111000011100001000000001}\\
+inverse:     & \bstr{101001110111011111011111111111110}.
+\end{tabular}
+\end{center}
+The input has $7$ zeros and $26$ ones; its image has $20$ zeros and $13$ ones.  The useful
+observation is zero enrichment: repeated contextual regularity has become a concentration of
+prediction successes.  The example is not evidence of compression, and no compression result is
+claimed here.  $\cxor$ emits exactly one bit for every input bit and can be inverted exactly.
+
+The paper first defines this predictor and its decoder, then makes precise which regularities
+$\W5$ can expose and why their exposure is separate from both invertibility and compression.
+Only after that do we vary the learning rule.  Within the one-bit $\cxor$ architecture, if a cell
+may be updated using only its old value $s$ and the observed bit $x$, the update is a Boolean function
+\[
+  w:\mathbb F_2^2\longrightarrow\mathbb F_2,
+\]
+and there are exactly $2^{2^2}=16$ possibilities.  This finite design space classifies the narrow
+$\cxor$ model, not the CTA family.
+
+The construction studied here originated in earlier unpublished work by the author on the
+broader CTA family.  That work existed in manuscript and implementation form, but the binary XOR
+construction was never published as a separate, self-contained treatment.  The present paper
+extracts that operation from the broader line of work, formalises it independently, and calls it
+$\cxor$.
+
+The analysis makes four contributions.
+\begin{enumerate}
+  \item It identifies the historical $\W5$ implementation as a last-observation context predictor
+        followed by an exclusive-or residual.
+  \item It proves that causal prediction makes every one of the sixteen transforms sequentially
+        invertible; reversibility comes from the predictor/residual construction, not from a
+        special feature of $\W5$.
+  \item It classifies the rules by algebraic normal form.  The eight affine rules admit a compact
+        per-context operator description and realise only $1$, $1+T$, or $(1+T)^{-1}$; the other
+        eight have data-dependent state retention.
+  \item It interprets the resulting memory horizons as adaptation behaviour.  $\W5$ replaces an
+        old belief after one observation, whereas $\W6(s,x)=s\oplus x$ preserves old state.
+\end{enumerate}
+
+Three notions will remain separate throughout.  \emph{Prediction performance} is a property of a
+rule, a context order, and a particular source; it can be measured by the residual zeros.
+\emph{Invertibility} is structural and holds even when every prediction is poor.
+\emph{Compression} requires an additional model and coder.  Confusing any two of these obscures
+what $\cxor$ does.

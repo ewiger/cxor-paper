@@ -1,0 +1,124 @@
+\section{Structure of the transform}\label{sec:structure}
+
+The address sequence interleaves $2^m$ one-cell machines.  Once those machines are separated, the
+algebra of the sixteen rules becomes transparent.
+
+\subsection{Per-context decomposition}
+
+Fix an input and prefix.  For a context $a$, let $k_{a,0}<k_{a,1}<\cdots$ be its visits, set
+$y_{a,j}=x_{k_{a,j}}$, and let $u_{a,j}$ be cell $a$ immediately before its $j$th visit.  Directly
+from Algorithm~\ref{alg:cxor},
+\begin{equation}\label{eq:per-context-general}
+  r_{k_{a,j}}=y_{a,j}+u_{a,j},
+  \qquad
+  u_{a,j+1}=w(u_{a,j},y_{a,j}).
+\end{equation}
+No recurrence for $a$ reads a cell belonging to another context.  The full transform is therefore
+an interleaving of independent per-context recurrences; the source itself determines the
+interleaving through its preceding $m$-bit windows.
+
+This decomposition also separates two roles that can otherwise be confused.  Addressing decides
+\emph{when} a state is consulted.  The wiring decides how that state evolves \emph{between visits
+to the same context}.  Invertibility needs only that the address at the next step be recoverable
+from the decoded prefix, while the operator and adaptation properties below belong to the
+per-context recurrence.
+
+\subsection{Affine rules and three transfer operators}
+
+Assume first that $d_3=0$, so
+\[
+  w(s,x)=d_0+d_1s+d_2x.
+\]
+Within one context, let $T$ mean ``previous visit to this same context'': $(Tz)_0=0$ and
+$(Tz)_j=z_{j-1}$ for $j\ge1$.  The recurrence
+\[
+  u_{j+1}=d_0+d_1u_j+d_2y_j,
+  \qquad r_j=y_j+u_j
+\]
+gives, after collecting the terms that depend linearly on $y$,
+\begin{equation}\label{eq:new-transfer}
+  r
+  =
+  \frac{1+(d_1+d_2)T}{1+d_1T}\,y+c .
+\end{equation}
+Here $c$ is an additive response determined by the initial cell and $d_0$.  Division is only
+compact notation: if $d_1=1$, then
+\[
+  (1+T)^{-1}=1+T+T^2+\cdots,
+\]
+and only finitely many terms contribute at any visit.  Equation~\eqref{eq:new-transfer} is the
+usual linear-recurrence calculation over $\F$ \cite{golomb1967,lincostello2004}, with delay
+measured in visits rather than adjacent tape positions.
+
+Only $(d_1,d_2)$ affects the linear operator, so the eight affine wirings realise exactly three:
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}cllc@{}}
+\toprule
+$(d_1,d_2)$ & operator & wirings & constant-free representative\\
+\midrule
+$(0,0)$ or $(1,0)$ & $1$ & $\W0,\W3,\W{12},\W{15}$ & $\W0,\W3$\\
+$(0,1)$ & $1+T$ & $\W5,\W{10}$ & $\W5$\\
+$(1,1)$ & $(1+T)^{-1}$ & $\W6,\W9$ & $\W6$\\
+\bottomrule
+\end{tabular}
+\caption{The affine update rules collapse to three per-context operators.  Rules paired in a row
+differ only by an additive response.}
+\label{tab:operators-new}
+\end{table}
+
+For $\W5$, the equation $r=(1+T)y+c$ is exactly the contextual difference in
+Equation~\eqref{eq:w5-per-context}.  For $\W6$, the state accumulates past symbols and the output
+is their running exclusive-or, giving $(1+T)^{-1}$.  These are the only constant-free affine
+rules with nonidentity operators.
+
+When $d_3=1$, the recurrence can instead be written
+\begin{equation}\label{eq:nonaffine-recurrence}
+  u_{j+1}=(d_0+d_2y_j)+(d_1+y_j)u_j .
+\end{equation}
+The multiplier of the old state now depends on the arriving symbol.  The input-output map is in
+general nonlinear in $y$, so no fixed linear transfer operator represents these eight rules.
+They should be regarded as data-dependent updates, not as additional entries in
+Table~\ref{tab:operators-new}.
+
+The operator statement is per context, or equivalently conditional on a fixed address sequence.
+For $m\ge2$, the partition of tape positions into contexts depends on the source, so $T$ itself
+changes when the tape changes.  The three-operator result must not be misread as claiming that the
+whole source-to-residual map is globally linear.
+
+\subsection{Adaptation and memory horizon}
+
+The ANF also says how long an old prediction can matter.  Run the same context sequence twice
+with different initial cell bits, and let $\delta_j$ be the difference between the two states
+before visit $j$.  Subtracting the two copies of Equation~\eqref{eq:anf-new} gives
+\begin{equation}\label{eq:delta-horizon}
+  \delta_{j+1}=(d_1+d_3y_j)\delta_j,
+  \qquad
+  \delta_j=\delta_0\prod_{i<j}(d_1+d_3y_i).
+\end{equation}
+Because the emitted residual contains the current state, the same $\delta_j$ measures the effect
+of the old cell on the output at visit $j$.  Four adaptation regimes follow.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}clll@{}}
+\toprule
+$(d_1,d_3)$ & retention factor & wirings & adaptation horizon\\
+\midrule
+$(0,0)$ & $0$ & $\W0,\W5,\W{10},\W{15}$ & old state affects the first visit only\\
+$(1,0)$ & $1$ & $\W3,\W6,\W9,\W{12}$ & old state is never forgotten\\
+$(0,1)$ & $y$ & $\W1,\W4,\W{11},\W{14}$ & retained through $1$s; a $0$ erases it\\
+$(1,1)$ & $1+y$ & $\W2,\W7,\W8,\W{13}$ & retained through $0$s; a $1$ erases it\\
+\bottomrule
+\end{tabular}
+\caption{The four memory horizons.  For the nonlinear rules, retention is controlled by the
+observed successor sequence within each context.}
+\label{tab:adaptation-new}
+\end{table}
+
+$\W5$ is immediately forgetting in the intended predictive sense: after one visit, its state is
+the new observation and contains no information about the previous belief.  This is maximal
+adaptation for a one-bit hard predictor.  $\W6$ is the opposite affine extreme: changing the
+initial cell changes every later state and residual in that context.  The nonlinear rules offer
+conditional forgetting; whether an old state survives is decided by the observed symbol.  Thus
+the affine/nonlinear split is also a split between fixed and data-dependent adaptation behaviour.

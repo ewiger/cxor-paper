@@ -1,0 +1,54 @@
+\documentclass[11pt,a4paper]{article}
+
+\input{preamble.tex}
+\addbibresource{paper.bib}
+
+\title{%
+  \texorpdfstring{{\Huge\bfseries$\mathbf{cxor}$}}{cxor}\\[6pt]
+  {\large A One-Bit Context Transform over \texorpdfstring{$\F$}{F2}}\\[-5pt]
+  {\large and Its Sixteen Update Rules}}
+\author{Yauhen Yakimovich\\
+        \small\href{mailto:yauhen.yakimovich.mail@gmail.com}{yauhen.yakimovich.mail@gmail.com}}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Context Transformation Algorithms (CTA) originated as a broader family of context-addressed
+transforms.  This paper isolates one binary member, called $\cxor$ (CTA-XOR), in which every
+$m$-bit context addresses a single bit of state and the source symbol is combined with that state
+by addition in $\F$.  Reading the state as a hard next-bit prediction makes the emitted bit a
+prediction residual: zero denotes a correct prediction and one an error.  The historically
+implemented update $\W5(s,x)=x$ replaces the prediction with the observation, so a context
+predicts that its next successor will equal its most recently observed successor.
+
+$\cxor$ is not itself a compressor: it is length preserving and bijective.  Its possible use is
+to expose contextual predictability as a zero-rich residual for a subsequent coder.  We prove
+that sequential decoding follows from causality and does not depend on the particular update
+rule.  Under the deliberately narrow one-bit $\cxor$ assumptions, an update is an arbitrary
+Boolean function of the old state and current symbol, giving exactly sixteen wirings.  Algebraic
+normal form separates eight affine rules, whose per-context behaviour reduces to the three
+operators $1$, $1+T$, and $(1+T)^{-1}$, from eight data-dependent rules.  The same analysis yields
+four adaptation horizons.  $\W5$ realises contextual differencing and forgets an old prediction
+after one observation; $\W6$ realises running parity and retains its old state indefinitely.  At
+context order zero these are the two directions of binary Gray coding.
+\end{abstract}
+
+\input{paper/01-intro.tex}
+\input{paper/02-cta.tex}
+\input{paper/03-predictive.tex}
+\input{paper/04-wirings.tex}
+\input{paper/05-structure.tex}
+\input{paper/06-special.tex}
+\input{paper/07-ladder.tex}
+\input{paper/08-conclusion.tex}
+
+\appendix
+\input{paper/A-implementation.tex}
+\input{paper/C-additional.tex}
+\input{paper/B-verification.tex}
+
+\printbibliography
+
+\end{document}

@@ -1,0 +1,62 @@
+\section{W5, W6, and the Gray-code special case}\label{sec:special}
+
+The two nontrivial affine operators describe very different state semantics.  Along one context
+class with initial state $q$, Equations~\eqref{eq:w5-rule} and \eqref{eq:w6-rule} unwind to
+\begin{align}
+\W5:\quad
+  r_0&=y_0+q,
+  &r_j&=y_j+y_{j-1} &&(j\ge1),\label{eq:w5-unwind}\\
+\W6:\quad
+  r_j&=q+\sum_{i=0}^{j}y_i .&&&&\label{eq:w6-unwind}
+\end{align}
+$\W5$ asks whether the current successor differs from the last successor of this context.  Its
+state is a prediction with a clear learning rule.  $\W6$ reports cumulative parity; because its
+new state equals the emitted $r_j$, it feeds the residual back into the next visit.  Its state
+continues to contain the initial bit and all previous successors.
+
+\begin{figure}[ht]
+  \centering
+  \input{fig/wiring.tex}\hspace{1.1cm}\input{fig/wiring6.tex}
+  \caption{$\W5$ and $\W6$ use the same emitter.  Moving the feedback tap from before the
+  exclusive-or to after it changes a last-observation predictor into a running-parity state.}
+  \label{fig:w5-w6-taps}
+\end{figure}
+
+The operators $1+T$ and $(1+T)^{-1}$ are mutual inverses, but this statement has a precise scope.
+If the address sequence is held fixed, applying the $\W6$ recurrence to the $\W5$ residual (or
+vice versa) restores each per-context sequence.  In $\cxor$, however, addresses are generated
+from the transform's current input.  Feeding a $\W5$ residual into a fresh $\W6$
+encoder generally produces a different address sequence and is not the decoder of
+Section~\ref{sec:cta}.  The causal decoder reconstructs source bits and reproduces the original
+addresses while applying the \emph{same} update rule.  Operator duality and transform inversion
+are therefore related but distinct facts.
+
+\subsection{Order zero}
+
+At $m=0$ there is only one context, so visits are ordinary adjacent positions and $T$ is the
+usual one-step delay.  With a zero initial cell, $\W5$ gives
+\begin{equation}\label{eq:gray}
+  r_0=x_0,
+  \qquad
+  r_k=x_k+x_{k-1}\quad(k\ge1).
+\end{equation}
+If the bits are read most significant first as the binary representation of an integer $b$,
+Equation~\eqref{eq:gray} is exactly reflected binary (Gray) encoding
+\[
+  g=b\mathbin{\oplus}(b\mathbin{\gg}1)
+\]
+\cite{gray1953}.  $\W6$ takes prefix exclusive-ors and is the corresponding Gray decoder.  This
+is the simplest concrete instance of the two transfer operators.
+
+For example, $90$ is $\bstr{01011010}$ in eight-bit binary.  $\W5$ emits
+$\bstr{01110111}$, representing $119=90\oplus45$, and $\W6$ maps that word back to
+$\bstr{01011010}$.  In this order-zero case the fixed-address operator duality is also an ordinary
+composition of the two transforms, because there is no source-dependent address sequence to
+change between passes.
+
+For $m>0$, the delay means ``previous visit to this context'' rather than ``previous tape
+position.''  At $m=1$ with zero table and prefix, $\W5$ happens to reduce to the stride-two
+difference $r_k=x_k+x_{k-2}$, taking out-of-range bits as zero.  At larger orders the visit
+partition is source-dependent and no fixed tape stride describes it.  Calling $\cxor$ a
+generalised Gray code would therefore hide its defining feature: context-addressed prediction.
+Gray coding is an elegant boundary case, not the main interpretation.

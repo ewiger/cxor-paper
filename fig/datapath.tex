@@ -1,0 +1,47 @@
+\begin{tikzpicture}[
+    >={Stealth[length=2.4mm]},
+    box/.style={draw, rounded corners=1.5pt, inner xsep=6pt, inner ysep=4pt, font=\small},
+    cell/.style={draw, minimum size=6.5mm, inner sep=0pt, font=\footnotesize},
+    xorg/.style={draw, circle, minimum size=5.5mm, inner sep=0pt},
+    lbl/.style={font=\footnotesize},
+    wire/.style={line width=0.5pt},
+  ]
+  % ---------------- tape
+  \node[cell] at (2.35,4.3) {};
+  \foreach \p in {3.0,3.65,4.3,4.95} { \node[cell] at (\p,4.3) {}; }
+  \node[cell, fill=black!12] (ck) at (5.6,4.3) {};
+  \node[cell] at (6.25,4.3) {};
+  \node[cell] at (6.9,4.3) {};
+  \node[lbl] at (1.6,4.3) {tape $\tape:$};
+  \node[lbl, above=2pt of ck] {$\tape(k)$};
+  \draw[decorate, decoration={brace, amplitude=4pt, mirror}, wire]
+       (2.675,3.9) -- (5.275,3.9)
+       node[midway, below=4pt, lbl] {window: the $m$ symbols \emph{before} $k$};
+
+  % ---------------- address
+  \node[box] (adr) at (3.975,2.75) {address $\addr{k}$};
+  \draw[->,wire] (3.975,3.45) -- (adr.north);
+
+  % ---------------- table
+  \node[box, minimum width=2.8cm, minimum height=9mm] (tab) at (2.4,1.3)
+       {table $\tab:\addrset\to\F$};
+  \draw[->,wire] (adr.south) -- (3.975,2.05) -- (2.4,2.05) -- (tab.north);
+
+  % ---------------- emitter
+  \node[xorg] (xr) at (5.6,1.3) {$+$};
+  \draw[->,wire] (tab.east) -- node[above, lbl] {$u=\cell{\addr{k}}$} (xr.west);
+  \draw[->,wire] (ck.south) -- node[right, lbl, pos=0.66] {$\tape(k)$} (xr.north);
+  \node[box] (out) at (7.5,1.3) {$\out(k)$};
+  \draw[->,wire] (xr.east) -- (out.west);
+
+  % ---------------- wiring
+  \node[box, minimum width=2.4cm, fill=black!5] (w) at (5.6,-0.6) {wiring $\wir(u,\tape(k))$};
+  \draw[->,wire] (tab.south) -- (2.4,-0.6) -- node[above,lbl,pos=0.4] {$u$} (w.west);
+  \fill (5.6,2.2) circle (1.4pt);
+  \draw[->,wire] (5.6,2.2) -- (8.6,2.2) -- (8.6,-0.6) -- (w.east);
+
+  % ---------------- write-back
+  \draw[->,wire, line width=0.8pt]
+       (w.south) -- (5.6,-1.6) -- node[below, lbl, pos=0.55] {write one bit back to $\cell{\addr{k}}$}
+       (0.45,-1.6) -- (0.45,1.3) -- (tab.west);
+\end{tikzpicture}

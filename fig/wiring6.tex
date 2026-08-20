@@ -1,0 +1,18 @@
+\begin{tikzpicture}[
+    >={Stealth[length=2.2mm]},
+    box/.style={draw, rounded corners=1.5pt, inner xsep=6pt, inner ysep=4pt, font=\small},
+    xorg/.style={draw, circle, minimum size=5mm, inner sep=0pt},
+    lbl/.style={font=\footnotesize},
+    wire/.style={line width=0.5pt},
+    fb/.style={line width=1.1pt},
+  ]
+  \node[box, minimum width=1.6cm] (S) at (0,0) {$\cell{\addr{k}}$};
+  \node[xorg] (xr) at (2.2,0) {$+$};
+  \node[box] (out) at (3.9,0) {$\out(k)$};
+  \draw[->,wire] (S.east) -- node[above,lbl] {$u$} (xr.west);
+  \draw[->,wire] (2.2,1.25) -- node[right,lbl,pos=0.15] {$\tape(k)$} (xr.north);
+  \draw[->,wire] (xr.east) -- (out.west);
+  \fill (2.95,0) circle (1.5pt);
+  \draw[->,fb] (2.95,0) -- (2.95,-1.0) -- (0,-1.0) -- (S.south);
+  \node[lbl] at (1.2,-1.5) {$\W6:\; \cell{\addr{k}}\leftarrow u+\tape(k)=\out(k)$};
+\end{tikzpicture}

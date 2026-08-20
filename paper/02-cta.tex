@@ -1,0 +1,125 @@
+\section{The \texorpdfstring{$\cxor$}{cxor} architecture}\label{sec:cta}
+
+Let $\F=\{0,1\}$, with addition interpreted as exclusive-or.  Fix a context order $m\ge0$.
+The context set is $A=\F^m$, and a table $s:A\to\F$ contains one bit for every context.  Before
+the input starts, the table has a known initial value $s_0$ and the context window has a known
+prefix $\pi\in\F^m$.  The reference $\W5$ program uses zeros for both.
+
+For an input $x=x_0x_1\dots x_{n-1}$, the address $a_k$ at position $k$ is the length-$m$ suffix
+of $\pi x_0\dots x_{k-1}$.  In particular, $a_k$ contains only source symbols \emph{strictly
+before} $x_k$.  At a step, write $u=s[a_k]$ for the state read from the addressed cell.  The
+general datapath is
+\begin{equation}\label{eq:machine-step}
+  r_k=x_k+u,
+  \qquad
+  s[a_k]\leftarrow w(u,x_k),
+\end{equation}
+where $w$ is a one-bit update rule.  The historical instance uses $w=\W5$, so the second
+assignment is simply $s[a_k]\leftarrow x_k$.
+
+\begin{figure}[ht]
+  \centering
+  \input{fig/datapath.tex}
+  \caption{One $\cxor$ step.  The preceding $m$ source symbols address a one-bit prediction; the
+  exclusive-or emits a residual; and the update rule writes the addressed cell.  In the
+  historical $\W5$ implementation the shaded update is $\W5(u,x)=x$.}
+  \label{fig:cxor-datapath}
+\end{figure}
+
+\begin{algorithm}[ht]
+\caption{$\cxor_w$; choose $w=\W5$ for the historical instance}\label{alg:cxor}
+\DontPrintSemicolon
+$c\leftarrow\pi$; $s\leftarrow s_0$\;
+\For{$k\leftarrow0$ \KwTo $n-1$}{
+  $a\leftarrow c$; $u\leftarrow s[a]$\;
+  $r_k\leftarrow x_k+u$\;
+  $s[a]\leftarrow w(u,x_k)$\;
+  $c\leftarrow\operatorname{suffix}_m(c x_k)$\;
+}
+\Return $r$
+\end{algorithm}
+
+The ordering matters.  The lookup precedes the window shift, so the prediction is causal.  The
+current symbol is used to update the prediction only after its residual has been emitted.
+
+\subsection{Why the reference code is exactly \texorpdfstring{$\W5$}{W5}}
+
+The reference implementation expresses its update conditionally:
+\begin{lstlisting}
+diff = state != x
+out_bits.append(diff)
+if diff:
+    lookup[index] = x
+\end{lstlisting}
+For bits, \code{state != x} is $s[a_k]\oplus x_k$, so \code{diff} is precisely the residual
+$r_k$.  When \code{diff} is true, the code stores $x_k$.  When it is false, the assignment is
+unnecessary because $s[a_k]=x_k$ already.  Consequently the conditional is equivalent to the
+unconditional update
+\[
+  s[a_k]\leftarrow x_k,
+\]
+which is $\W5$.  Operationally, the program reads the prediction, reports whether it was wrong,
+and makes the new prediction equal to the observation.
+
+\subsection{A small trace}
+
+Take $m=2$, a zero prefix and table, and the periodic input $x=\bstr{010101010}$.  The first
+occurrences of contexts $\bstr{01}$ and $\bstr{10}$ establish their successors.  Thereafter the
+same associations repeat, so their residuals are zero.
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{@{}rccccc@{}}
+\toprule
+$k$ & context $a_k$ & source $x_k$ & prediction $u$ & residual $r_k$ & new prediction\\
+\midrule
+0 & \bstr{00} & 0 & 0 & 0 & 0\\
+1 & \bstr{00} & 1 & 0 & 1 & 1\\
+2 & \bstr{01} & 0 & 0 & 0 & 0\\
+3 & \bstr{10} & 1 & 0 & 1 & 1\\
+4 & \bstr{01} & 0 & 0 & 0 & 0\\
+5 & \bstr{10} & 1 & 1 & 0 & 1\\
+6 & \bstr{01} & 0 & 0 & 0 & 0\\
+7 & \bstr{10} & 1 & 1 & 0 & 1\\
+8 & \bstr{01} & 0 & 0 & 0 & 0\\
+\bottomrule
+\end{tabular}
+\caption{$\W5$ on a two-bit context.  The output is $\bstr{010100000}$.  Each zero is a correct
+hard prediction, including initial predictions from the zero table.}
+\label{tab:small-w5-trace}
+\end{table}
+
+The trace also shows why periodicity is only a special case of the mechanism.  The machine does
+not search for a period; it independently remembers that $\bstr{01}$ was followed by $0$ and
+$\bstr{10}$ by $1$.
+
+\subsection{Sequential decoder}
+
+The residual loses no information.  A decoder starts with the same prefix, table, and update
+rule.  Suppose it has already recovered $x_0,\dots,x_{k-1}$.  Those bits determine $a_k$, and
+replaying the same updates determines the encoder's current $u=s[a_k]$.  Hence
+\begin{equation}\label{eq:decode-short}
+  x_k=r_k+u.
+\end{equation}
+The decoder then applies $s[a_k]\leftarrow w(u,x_k)$ and advances the window with the recovered
+symbol.  This proves the following general fact.
+
+\begin{theorem}[Causal residuals are invertible]\label{thm:causal-inverse}
+For every $m$, initial table $s_0$, prefix $\pi$, deterministic update rule $w$, and length $n$,
+Algorithm~\ref{alg:cxor} is a bijection $\F^n\to\F^n$.
+\end{theorem}
+
+\begin{proof}
+Equation~\eqref{eq:decode-short} recovers the input sequentially.  Induction on $k$ shows that
+encoder and decoder have identical windows and tables before every step, so the recovery is
+unique.  The resulting inverse maps the finite set $\F^n$ onto itself.
+\end{proof}
+
+The proof does not invert $w$ and uses no special property of $\W5$.  It inverts the exclusive-or
+emitter using a prediction reproducible from the already decoded prefix.  This is the same causal
+principle used by predictive lossless codes with much richer predictors.
+
+If the window were shifted before lookup, so that $x_k$ participated in its own address, the
+decoder would in general need $x_k$ to discover the prediction required to recover $x_k$.
+Collisions then occur for ordinary nonzero tables.  The lagging, source-driven address in
+Algorithm~\ref{alg:cxor} is therefore part of the transform, not a cosmetic indexing convention.

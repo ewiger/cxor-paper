@@ -1,0 +1,75 @@
+\section{The \texorpdfstring{$\W5$}{W5} instance as a predictive transform}\label{sec:predictive}
+
+The one-bit state has a direct operational meaning under $\W5$.  Fix a context $a$, and list the
+positions at which it occurs as
+\[
+  k_0<k_1<k_2<\cdots .
+\]
+Let $y_j=x_{k_j}$ be the symbol that follows that occurrence of $a$.  If the initial cell is
+$q_a$, $\cxor_{\W5}$ emits
+\begin{equation}\label{eq:w5-per-context}
+  r_{k_0}=y_0+q_a,
+  \qquad
+  r_{k_j}=y_j+y_{j-1}\quad(j\ge1).
+\end{equation}
+The first visit is predicted from the initial table.  Every later visit compares the current
+successor with the successor observed on the preceding visit to the same context.  Thus $\W5$ is
+contextual differencing: after the first visit, a zero says exactly that the association
+$a\mapsto y$ has repeated.
+
+This gives a more accurate description than saying that $\W5$ detects periodic substrings.
+$\W5$ suppresses repeated context-to-successor associations.  Periodic and locally repetitive
+sources are important special cases: once an $m$-bit context recurs with a stable successor,
+subsequent visits to that context emit zero.  But periodicity is neither necessary nor sufficient
+as a source-wide description.  Different contexts may recur at irregular intervals, and a
+repeated context whose successor alternates will produce errors rather than zeros.
+
+\subsection{What determines zero enrichment}
+
+The residual depends jointly on the source and the model order.
+\begin{itemize}
+  \item \emph{Context order.}  A small $m$ merges histories that may have different successors;
+        a large $m$ separates them but creates more cells to learn.
+  \item \emph{Input length and recurrence.}  There are $2^m$ possible contexts.  On a short input,
+        many are never revisited, so their one-bit memories cannot contribute a learned
+        prediction.  A context seen only once is predicted solely from its initial cell.
+  \item \emph{Successor stability.}  Recurrence helps only when repeated occurrences tend to have
+        the same following bit.  Equation~\eqref{eq:w5-per-context} makes this dependence exact.
+  \item \emph{Initialisation.}  The initial table affects the first visit to each context.  The
+        zero table used by the reference implementation initially predicts zero everywhere;
+        $\W5$ overwrites that choice after one observation.
+\end{itemize}
+
+The example in the introduction illustrates these conditions rather than proving a general
+gain.  Its 33 symbols are long enough to revisit several four-bit contexts, and enough of those
+contexts repeat their successor that the residual contains 20 zeros instead of 7.  On another
+source, or with another $m$, $\W5$ may leave the marginal balance unchanged or make it less
+favourable.  Prediction performance is therefore empirical even though the transform is exact.
+
+\subsection{Why this is not compression}
+
+$\cxor_w$ maps $n$ input bits to $n$ residual bits, and Theorem~\ref{thm:causal-inverse} says that
+it permutes the $2^n$ possible strings for every wiring.  It does not reduce length or information
+entropy by itself.
+The intended architecture, if the residual is useful, is
+\[
+  x
+  \longrightarrow
+  \text{$\cxor_{\W5}$ residual}
+  \longrightarrow
+  \text{statistical model and entropy coder}.
+\]
+A downstream coder might exploit a residual with a strong zero bias, long zero runs, or other
+simple structure more easily than it exploits the original context dependence.  Whether it
+actually does so depends on that coder and on the source; it is an experimental question not
+answered by the algebra in this paper.
+
+The role is analogous in spirit to other reversible preprocessing transforms.  The
+Burrows--Wheeler transform, for example, is valuable because it presents existing dependence in
+a form suitable for simple back ends, not because the permutation itself shortens the data
+\cite{burrows1994block}.  $\cxor_{\W5}$ uses a causal predictor rather than block sorting, so the analogy
+should not be taken further.
+
+Zero frequency, invertibility, and compressed size therefore answer different questions.  The
+first measures hard-prediction success for a specific run.  The second is guaranteed by causal
+decoding.  The third can be known only after a downstream representation has been specified.

@@ -1,0 +1,41 @@
+% ---------------------------------------------------------------- packages
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[margin=3.1cm]{geometry}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{caption}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,decorations.pathreplacing}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+\usepackage[backend=biber,style=alphabetic,maxbibnames=6]{biblatex}
+
+% ---------------------------------------------------------------- theorems
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+
+% ---------------------------------------------------------------- notation
+\newcommand{\F}{\mathbb{F}_2}                  % the two-element field
+\newcommand{\W}[1]{\mathsf{W}_{#1}}            % wiring by truth-table index
+\newcommand{\wir}{w}                           % a generic wiring
+\newcommand{\cxor}{\mathrm{cxor}}
+\newcommand{\tape}{x}
+\newcommand{\tab}{s}
+\newcommand{\out}{r}
+\newcommand{\addrset}{A}
+\newcommand{\addr}[1]{a_{#1}}                  % the address in force at step #1
+\newcommand{\cell}[1]{\tab[#1]}                % one bit of storage
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\bstr}[1]{\text{\texttt{#1}}}
+
+% ---------------------------------------------------------------- listings
+\lstset{basicstyle=\ttfamily\small, keywordstyle=\bfseries,
+        commentstyle=\itshape, columns=fullflexible, frame=leftline,
+        framesep=8pt, xleftmargin=10pt, showstringspaces=false, language=Python}
