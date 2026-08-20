@@ -2,7 +2,9 @@
 
 The following dependency-free code implements the sixteen-rule transform and its causal decoder.
 The wiring index uses the truth-table convention of Section~\ref{sec:wirings}; selecting
-\code{k=5} gives the historical $\cxor$ instance.
+\code{k=5} gives the historical $\cxor$ instance.  This listing, the historical implementation,
+and the harnesses of Appendix~\ref{sec:verification-new} are all contained in the paper's
+repository~\cite{cxorrepo}.
 
 \begin{lstlisting}
 def wiring(k, s, x):
@@ -38,7 +40,7 @@ def decode(residual, m=4, k=5, table=None, prefix=None):
     return bits
 \end{lstlisting}
 
-The historical \code{cta.py} uses a \code{bitarray} table and performs the $\W5$ assignment only
+The historical \code{cta.py} of~\cite{cxorrepo} uses a \code{bitarray} table and performs the $\W5$ assignment only
 when the residual is one.  As shown in Section~\ref{sec:cta}, omitting the assignment when the
 residual is zero leaves exactly the same state.  Its inverse reconstructs $x=r\oplus s[a]$, writes
 $x$ to the cell, and shifts the recovered bit into the context, matching \code{decode(..., k=5)}

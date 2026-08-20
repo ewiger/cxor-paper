@@ -1,7 +1,8 @@
 \section{Computational checks}\label{sec:verification-new}
 
 The proofs in the body do not depend on experiments.  A deterministic, dependency-free harness
-in \code{cta\_spec.py} nevertheless checks the implementation against the main claims.  Running
+in \code{cta\_spec.py}~\cite{cxorrepo} nevertheless checks the implementation against the main
+claims.  Running
 \code{make check} performs, among other tests:
 \begin{itemize}
   \item exhaustive truth-table indexing and ANF classification for all sixteen wirings;
@@ -16,7 +17,7 @@ in \code{cta\_spec.py} nevertheless checks the implementation against the main c
         stride-two identity at order one through length $13$.
 \end{itemize}
 
-The separate \code{cta\_w5\_w6.py} harness reproduces the reference 33-bit example, compares the
+The separate \code{cta\_w5\_w6.py} harness of the same repository reproduces the reference 33-bit example, compares the
 $\W5$ and $\W6$ interpretations, exercises the causal inverse, and verifies their mutual inverse
 relationship when the address sequence is frozen.  The earlier implementation's output agrees with $\W5$:
 \[
