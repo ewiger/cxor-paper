@@ -22,11 +22,20 @@ per-context operators, and adaptation horizons, with $\mathsf{W}_5$ as the histo
 $\mathsf{W}_6(s,x)=s\oplus x$ as its running-parity counterpart.
 
 ```bash
-make            # build cxor-paper.pdf
-make check      # run the verification harness
+make                 # build cxor-paper.pdf
+make check           # run the verification harness
+make hal-source      # build dist/cxor-paper-source.zip for a HAL deposit
+make hal-source-list # list the files that archive would contain
 ```
 
 The historical implementation is [`cta.py`](cta.py), and the complete one-bit verification harness is
 [`cta_spec.py`](cta_spec.py).
 
 Author: Yauhen Yakimovich
+
+## License
+
+The paper and its LaTeX sources are licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); see
+[`PAPER-LICENSE`](PAPER-LICENSE). The code (`cta.py`, `cta_spec.py`,
+`cta_w5_w6.py`) is licensed under Apache 2.0; see [`LICENSE`](LICENSE).
