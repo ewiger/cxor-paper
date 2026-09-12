@@ -21,6 +21,16 @@ exactly sixteen wirings within this cxor model. The paper classifies their causa
 per-context operators, and adaptation horizons, with $\mathsf{W}_5$ as the historical protagonist and
 $\mathsf{W}_6(s,x)=s\oplus x$ as its running-parity counterpart.
 
+## Preprint
+
+*cxor: A One-Bit Context Transform over $\mathbb{F}_2$ and Its Sixteen Update Rules* is archived
+on Zenodo under the CC BY 4.0 licence:
+
+- Latest version: [10.5281/zenodo.22727917](https://doi.org/10.5281/zenodo.22727917)
+- This version: [10.5281/zenodo.22727918](https://doi.org/10.5281/zenodo.22727918)
+
+## Building
+
 ```bash
 make                 # build cxor-paper.pdf
 make check           # run the verification harness
