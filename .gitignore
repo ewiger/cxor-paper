@@ -21,3 +21,6 @@ __pycache__/
 
 # Source archives
 dist/
+
+# etc
+.DS_Store
